@@ -1,0 +1,7 @@
+this file
+contains the forbidden word
+we all fear
+the word is zombie and
+it is on line four
+the word the occurs four times
+this line does not end with a newline
