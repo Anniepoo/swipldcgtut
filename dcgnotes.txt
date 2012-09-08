@@ -1,3 +1,6 @@
+Markus' page
+http://www.logic.at/prolog/dcg.html
+
 1. Theory
 1.1.1 Difference Lists
 
@@ -131,6 +134,17 @@ handling errors
 DCG's for other than parsing input
 
 the 'valid airplane activity data' problem
+
+Learn Prolog Now discusses the role of extra arguments
+
+http://www.learnprolognow.org/lpnpage.php?pagetype=html&pageid=lpn-htmlse32
+
+
+ambiguous grammar
+
+http://stackoverflow.com/questions/6035451/what-is-an-ambiguous-context-free-grammar?rq=1
+
+================================
 
 On 08/31/2012 09:15 AM, Carlo Capelli wrote:
 > Hi Anne
