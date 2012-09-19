@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Tutorial -- Using Defnite Clause Grammars in SWI-Prolog</title>
+<title>Tutorial -- Using Definite Clause Grammars in SWI-Prolog</title>
 <meta name="author" content="Anne Ogborn" />
 <meta name="Copyright" content="Copyright (c) 2012 Anne Ogborn" />
 <meta name="robots" content="all" />
@@ -8,10 +8,11 @@
 </head>
 <body>
 <h1>Using Defnite Clause Grammars in SWI-Prolog</h1>
-
-<p>by <a href="mailto:markus.triska@gmx.at">Markus Triska</a>
-and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
-
+<p>NOTE: This tutorial is still in development.</p>
+<p>By <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
+<p>Thanks to <a href="mailto:markus.triska@gmx.at">Markus Triska</a>. Large sections
+of this tutorial are taken directly from <a href="http://www.logic.at/prolog/dcg.html">his tutorial</a>,
+which is used by permission here.</p>
 <p class='contents'><a href='#anchintro'>Introduction</a>
 <a href='#anch1'>1 Definite Clause Grammars</a>
 <a href='#anch2'>2 Relating Trees To Lists</a>
@@ -35,7 +36,7 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 
 <p>This course is this web page and a series of example programs.</p>
 
-<p>The example programs are <em>not</em> reproduced here. I want you to actually <em>look at</em> and <em>fiddle with</em> the code. So hopefully you'll be encouraged if you have to read it locally. You can get the examples <a href="https://github.com/Anniepoo/swipldcgtut">from github</a></p>
+<p>The example programs are <em>not</em> reproduced here. We want you to actually <em>look at</em> and <em>fiddle with</em> the code. So hopefully you'll be encouraged if you have to read it locally. You can get the examples <a href="https://github.com/Anniepoo/swipldcgtut">from github</a></p>
 
 <p>To get the most from this course, you'll need to</p>
 
@@ -60,14 +61,21 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 
 <p><a id='anch1' ></a></p>
 <h2>1 Definite Clause Grammars</h2>
-
-<p>A Prolog <em>definite clause grammar</em> (DCG) describes a Prolog list. Operationally, DCGs can be used to parse and generate lists. A DCG is defined by <em>DCG rules</em>. A DCG rule has the form: </p>
+<p>A Prolog <em>definite clause grammar</em> (DCG) describes a Prolog list.
+Operationally, DCGs can be used to parse and generate lists.</p>
+<h3>1_1 DCG rules</h3>
+<p>A DCG is defined by <em>DCG rules</em>. A DCG rule has the form: </p>
 
 <div class='precode'><pre><code>Head --&gt; Body.
 </code></pre></div>
-
-<p>A rule's head is a Prolog term that is not a variable. A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it from a regular Prolog predicate, which we refer to as <code>f/N</code>. A rule's body is a sequence of terminals and nonterminals, separated by (,)/2 (comma operator). A terminal is a Prolog list, which stands for the elements it contains. A nonterminal refers to a DCG rule or other language construct, which stand for the elements they themselves describe. Declaratively, we can read the comma as <em>"and then"</em> in DCGs. </p>
-
+<p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
+from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
+<p>A rule's head is a Prolog term that is not a variable.</p>
+<p>A rule's body is a sequence of terminals and nonterminals, separated by (,)/2 (comma operator).</p>
+<p>A terminal is a Prolog list, which stands for the elements it contains.</p>
+A nonterminal refers to a DCG rule or other language construct, which stand for the elements 
+they themselves describe. Declaratively, we can read the comma as <em>"and then"</em> in DCGs. </p>
+<p><img src="syntaxofdcg.png" /></p>
 <p>As an example, let us describe lists that only contain the atom 'a'. We shall use the nonterminal <code>as//0</code> to refer to such lists: </p>
 
 <div class='precode'><pre><code>   as --&gt; [].
@@ -101,6 +109,114 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
   X = a.
 </code></pre></div>
 
+<h3>1_2 More DCG Syntax</h3>
+<p>Double quoted strings <code>"some text"</code> are lists of char codes 
+(this behavior is changeable in SWI-Prolog). This makes for a convenient syntax with
+literals as strings:</p> 
+<div class='precode'><pre><code>cliche -->
+    thing,
+    " is a ", 
+    type_of_thing, 
+    " trapped in a ", 
+    opposite_type_of_thing, 
+    "'s body.".
+thing --> "Cygwin".
+type_of_thing --> "Unix OS".
+opposite_type_of_thing --> "Windows".
+
+?- phrase(cliche, X, []),format('~s~n', [X]).
+Cygwin is a Unix OS trapped in a Windows's body.
+</code></pre></div>
+<p>Arguments in head and body terms become formal and actual arguments, as in the <code>:-</code> operator.</p>
+<p>To execute a regular Prolog predicate from within a DCG body,
+we use the DCG language construct <code>{}//1</code>.</p>
+<p> This example demonstrates both concepts.</p>
+<div class='precode'><pre><code>fizz_buzz(Msg) --> anything, fizz(Msg), anything, buzz, anything.
+anything --> [].
+anything --> [_], anything.
+fizz(Msg) -->
+    "fizz",
+    {
+        format('At fizz we have Msg=~w~n', [Msg])
+    }.
+buzz -->
+    "buzz".
+</code></pre></div>
+<p>The <code>;</code> operator allows alternatives. This matches <code>a book</code>, <code>an book</code>, <code>a car</code>, or <code>an car</code></p>
+<div class='precode'><pre><code>
+article_phrase --> ("a" ; "an"),
+	" ",
+	noun.
+
+noun --> "book".
+noun --> "car".
+</code></pre></div>
+<p>The <code>\+</code> operator means 'anything but'</p>
+<div class='precode'><pre><code>
+doesnt_have_joe_in_it --> \+ [joe].
+TODO - asked on swipl list
+</code></pre></div>
+<p>The <code>-></code> operator means 'anything but'</p>
+<div class='precode'><pre><code>
+ab_or_c --> [a] -> [b]  ; [c].
+
+ab --> [a] -> [b].
+
+6 ?- phrase(ab_or_c, X, []).
+X = [a, b].
+
+7 ?- phrase(ab_or_c, [a,b], []).
+true.
+
+8 ?- phrase(ab_or_c, [c], []).
+true.
+
+9 ?- phrase(ab, [a,b], []).
+true.
+
+10 ?- phrase(ab, [c], []).
+false.
+</code></pre></div>
+<h3>1_3 Capturing Input</h3>
+<p>Arguments allow us to capture and use the input list. In this example any digits after
+boop must match the digits after beep, so the string must look like <code>"trash beep14 foo blah boop14 mep"</code></p>
+<div class='precode'><pre><code>beep_boop --> anything, beep(Suffix), anything, boop(Suffix), anything.
+
+beep(X) -->
+    "beep",
+    suffix(X).
+
+boop(X) -->
+    "boop",
+    suffix(X).
+
+suffix([H|T]) -->
+      [H],
+      {
+          code_type(H, digit)
+      },
+      suffix(T).
+suffix([]) --> []. % must be 2nd suffix clause, or the digits wind up in anything
+% At bottom for efficiency. At the top, would match beep first
+anything --> [].
+anything --> [_], anything.
+% A subtlety here.  "foo 7 beep1 bar boop14 fdds" is part of the language
+
+</code></pre></div>
+<h3>1_4 Variables in Body</h3>
+<p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
+from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
+<p>A gotcha - matching nothing is</p>
+<div class='precode'><pre><code>nothing --> [].
+</code></pre></div>
+<p>not</p>
+<div class='precode'><pre><code>% DONT DO THIS
+nothing.
+</code></pre></div>
+<p>Exercise</p>
+<div class='precode exercise'><pre><code>Add a comment to every line of example dcg1_1
+</code></pre></div>
+
 <p><a id='anch2' ></a></p>
 <h2>2 Relating Trees To Lists</h2>
 
@@ -127,13 +243,14 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 <h2>3 Left Recursion</h2>
 
 <p>Conversely, given a sequence of node names, what are the trees that yield this sequence?:</p>
-
+<p class='warning'>Note: Save your work before running this!</p>
 <div class='precode'><pre><code>  ?- phrase(tree_nodes(Tree), [a,b,c,d]).
   Tree = node(a, nil, node(b, nil, node(c, nil, node(d, nil, nil)))) ;
-  (nontermination)
+  (... program never finishes ...)
 </code></pre></div>
 
 <p>The system yields one (correct) solution, then loops. This is because the grammar is left-recursive: We recursively refer to a nonterminal <code>tree_nodes//1</code> before anything else. To be able to use this grammar for finding all matching trees, we need to encode that for the second rule to apply, at least one list element must be available since the rule contains exactly one terminal, and we need to check this in advance to avoid unbounded recursion. We can do this by introducing two additional arguments that let us limit the number of rule applications to the given list's length:</p>
+
 
 <div class='precode'><pre><code>  tree_nodes(nil, Ls, Ls) --&gt; [].
   tree_nodes(node(Name, Left, Right), [_|Ls0], Ls) --&gt;
@@ -157,12 +274,14 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 <p><a id='anch4' ></a></p>
 <h2>4 Right-hand Context Notation</h2>
 
-<p>Using right-hand context notation, also called pushback lists, lets you insert list elements that were initially not in the list that is being parsed. A DCG rule of the form:</p>
+<p>Using right-hand context notation, also called pushback lists, lets you insert list elements that were
+initially not in the list that is being parsed. A DCG rule of the form:</p>
 
 <div class='precode'><pre><code>  Head, [T_1,...,T_n] --&gt; Body.
 </code></pre></div>
 
-<p>can be read operationally as: parse the list using Body, then prepend the terms T_1, ..., T_n to the remaining list. For example:</p>
+<p>can be read operationally as: parse the list using Body, then prepend the terms T_1, ..., T_n to the
+remaining list. For example:</p>
 
 <div class='precode'><pre><code>  nt1, [b] --&gt; [a].
   nt2      --&gt; [b].
@@ -188,7 +307,8 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 
 <p>As expected, the atom 'b' remains in the list.</p>
 
-<p>Using right-hand context notation, we can implement look ahead, which lets us inspect the next element in the list without removing it. Operationally, we first remove it and then push it back:</p>
+<p>Using right-hand context notation, we can implement look ahead, which lets us inspect the
+next element in the list without removing it. Operationally, we first remove it and then push it back:</p>
 
 <div class='precode'><pre><code>  look_ahead(T), [T] --&gt; [T].
 </code></pre></div>
@@ -203,7 +323,18 @@ and <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 <p><a id='anch5' ></a></p>
 <h2>5 Implicitly Passing States Around</h2>
 
-<p>Right-hand context notation is also useful to implicitly pass around a state representation that is only accessed and changed by a subset of rules. For example, let us count the leaves in a binary tree with the above presentation. The <em>state</em> we shall pass around is a single number denoting the number of leaves encountered so far. To increment the state, we use Prolog's built-in arithmetic. To execute a regular Prolog predicate from within a DCG body, we use the DCG language construct <code>{}//1</code>. Operationally, when the construct <code>{Goal}</code> is executed in a DCG body, Goal is executed as a regular Prolog goal. Since a DCG must always describe a list, we wrap the state into a list and thus describe a list containing a single element. Notice that the second rule makes no reference at all to the state, since the number of leaves is not modified when an inner node is processed:</p>
+<p>Right-hand context notation is also useful to implicitly pass around a state representation 
+that is only accessed and changed by a subset of rules. For example, let us count the leaves in a
+binary tree with the above presentation. The <em>state</em> we shall pass around is a single number
+denoting the number of leaves encountered so far. To increment the state, we use Prolog's
+built-in arithmetic.</p>
+<p>To execute a regular Prolog predicate from within a DCG body,
+we use the DCG language construct <code>{}//1</code>. Operationally,
+when the construct <code>{Goal}</code> is executed in a DCG body, Goal is
+executed as a regular Prolog goal. Since a DCG must always describe a list, we
+wrap the state into a list and thus describe a list containing a single element.</p>
+<p>Notice that the second rule makes no reference at all to the state, since the number of
+leaves is not modified when an inner node is processed:</p>
 
 <div class='precode'><pre><code>  num_leaves(nil), [N1] --&gt; [N0], { N1 is N0 + 1 }.
   num_leaves(node(_,Left,Right)) --&gt;
