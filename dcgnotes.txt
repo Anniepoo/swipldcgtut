@@ -101,6 +101,8 @@ if you can't use parse_from_file
 read and insert
 line(LineNumber, String)
 
+often saying what the chain of nonterminals is is more useful.
+(could that be automated by examining stack?)
 
 research:s
 Swipl docs
@@ -268,3 +270,34 @@ Example:
 
 All the best,
 Markus
+
+
+=========
+
+Annie sez
+a note about this
+
+
+send_to(Email) -->
+	"\nTo: ",
+        Email,
+	"\n".
+
+from UH code
+send_to('annie66us@yahoo.com')
+
+produces a CALL to that as a pred!
+
+5 ?- phrase(mail:send_to(blah), X).
+ERROR: phrase/3: Undefined procedure: mail:blah/2
+6 ?- phrase(mail:send_to("blah"), X).
+X = [10, 84, 111, 58, 32, 98, 108, 97, 104|...].
+
+8 ?- phrase(mail:send_to(3), X),format('~s~n', [X]).
+ERROR: phrase/3: Type error: `callable' expected, found `3'
+
+
+you can use a term or a list
+
+foo --> a, B, c.
+

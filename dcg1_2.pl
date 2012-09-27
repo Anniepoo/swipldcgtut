@@ -4,10 +4,10 @@ cliche -->
     type_of_thing,
     " trapped in a ",
     opposite_type_of_thing,
-    "'s body.".
+    " body.".
 thing --> "Cygwin".
 type_of_thing --> "Unix OS".
-opposite_type_of_thing --> "Windows".
+opposite_type_of_thing --> "Windows'".
 
 try_literals :- phrase(cliche, X),format('~s~n', [X]).
 

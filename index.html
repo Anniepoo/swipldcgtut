@@ -21,7 +21,8 @@ which is used by permission here.</p>
 <a href='#anch5'>5 Implicitly Passing States Around</a>
 <a href='#anch6'>6 Parsing From Files</a>
 <a href='#anch7'>7 Implementation</a>
-<a href='#anch8'>8 Using DCGs</a>
+<a href='#anch8'>8 Error Handling</a>
+<a href='#anch8'>9 Using DCGs</a>
 <a href='#anchconclusion'>Conclusion</a></p>
 
 <h2>Introduction</h2>
@@ -34,7 +35,7 @@ which is used by permission here.</p>
 
 <h3>Getting The Most From This Course</h3>
 
-<p>This course is this web page and a series of example programs.</p>
+<p>Besides this web page we offer a series of example programs.</p>
 
 <p>The example programs are <em>not</em> reproduced here. We want you to actually <em>look at</em> and <em>fiddle with</em> the code. So hopefully you'll be encouraged if you have to read it locally. You can get the examples <a href="https://github.com/Anniepoo/swipldcgtut">from github</a></p>
 
@@ -108,7 +109,17 @@ they themselves describe. Declaratively, we can read the comma as <em>"and then"
   ?- phrase(as, [a,X,a]).
   X = a.
 </code></pre></div>
-
+<p>&nbsp;</p>
+<div class='precode exercise'><pre><code>Exercises:
+1) run 1_1. Add another DCG that creates an alternating series of a's and b's, so your output should look like:
+  Ls = [] ;
+  Ls = [a] ;
+  Ls = [a, b] ;
+  Ls = [a, b, a] ;
+  Ls = [a, b, a, b] ;
+  etc.
+2) Try the queries above in 'examples of more specific queries'
+</code></pre></div>
 <h3>1_2 More DCG Syntax</h3>
 <p>Double quoted strings <code>"some text"</code> are lists of char codes 
 (this behavior is changeable in SWI-Prolog). This makes for a convenient syntax with
@@ -119,13 +130,13 @@ literals as strings:</p>
     type_of_thing, 
     " trapped in a ", 
     opposite_type_of_thing, 
-    "'s body.".
+    " body.".
 thing --> "Cygwin".
 type_of_thing --> "Unix OS".
-opposite_type_of_thing --> "Windows".
+opposite_type_of_thing --> "Windows'".
 
 ?- phrase(cliche, X, []),format('~s~n', [X]).
-Cygwin is a Unix OS trapped in a Windows's body.
+Cygwin is a Unix OS trapped in a Windows' body.
 </code></pre></div>
 <p>Arguments in head and body terms become formal and actual arguments, as in the <code>:-</code> operator.</p>
 <p>To execute a regular Prolog predicate from within a DCG body,
@@ -142,6 +153,16 @@ fizz(Msg) -->
 buzz -->
     "buzz".
 </code></pre></div>
+<p>&nbsp;</p>
+<div class='precode exercise'><pre><code>Exercises:
+1) Modify the 'cliche' example above to also print 
+Fluffy is a dog trapped in a cat's body.
+Bob the swimmer is a fish trapped in a human body.
+and so on. Hint - use arguments to ensure you don't print
+Bob the swimmer is a dog trapped in a Windows' body.
+
+2) Try the queries above in 'examples of more specific queries'
+</code></pre></div>
 <p>The <code>;</code> operator allows alternatives. This matches <code>a book</code>, <code>an book</code>, <code>a car</code>, or <code>an car</code></p>
 <div class='precode'><pre><code>
 article_phrase --> ("a" ; "an"),
@@ -151,12 +172,27 @@ article_phrase --> ("a" ; "an"),
 noun --> "book".
 noun --> "car".
 </code></pre></div>
-<p>The <code>\+</code> operator means 'anything but'</p>
+<p>The <code>\+</code> operator matches the empty sequence if and only if the material beyond does <em>not</em>
+match it's argument</p>
+<p>By using the construct <code>\+</code> you are giving up many of the nice
+algebraic properties grammars are known for.  In particular, you can
+no longer be sure that a grammar generates the sentences it accepts.</p>
 <div class='precode'><pre><code>
-doesnt_have_joe_in_it --> \+ [joe].
-TODO - asked on swipl list
+anything_but_joe --> \+ [joe].
+2 ?- listing(anything_but_joe).
+anything_but_joe(A, B) :-
+        \+ A=[joe|_],
+        B=A.
 </code></pre></div>
-<p>The <code>-></code> operator means 'anything but'</p>
+<p>One particularly useful sequence is</p>
+<div class='precode'><pre><code>
+at_end --> \+ [_].
+</code></pre></div>
+<p>Which matches the end of the file.</p>
+<div class='precode exercise'><pre><code>Exercise:
+Implement a demonstration of the at_end nonterm.
+</code></pre></div>
+<p>The <code>-></code> operator means 'if followed by', and is semanticly near comma, so is infrequently used</p>
 <div class='precode'><pre><code>
 ab_or_c --> [a] -> [b]  ; [c].
 
@@ -176,7 +212,39 @@ true.
 
 10 ?- phrase(ab, [c], []).
 false.
+
+3 ?- listing(ab).
+ab(A, C) :-
+        (   A=[a|B]
+        ->  B=[b|C]
+        ).
+
+true.
+
+4 ?- listing(ab_or_c).
+ab_or_c(A, C) :-
+        (   A=[a|B]
+        ->  B=[b|C]
+        ;   A=[c|C]
+        ).
+
+true.
 </code></pre></div>
+<p>One construct where -> can produce clarity is controlling alternatives with <code>{}</code></p>
+<div class='precode'><pre><code>
+something(X) --> 
+      { is_wobbly(X) }  ->
+            (  
+               "a wobby ",
+               thing 
+            )
+        ;
+            (
+               "a stable ",
+               thing
+            ).
+</code></pre></div>
+
 <h3>1_3 Capturing Input</h3>
 <p>Arguments allow us to capture and use the input list. In this example any digits after
 boop must match the digits after beep, so the string must look like <code>"trash beep14 foo blah boop14 mep"</code></p>
@@ -203,9 +271,10 @@ anything --> [_], anything.
 % A subtlety here.  "foo 7 beep1 bar boop14 fdds" is part of the language
 
 </code></pre></div>
-<h3>1_4 Variables in Body</h3>
+<h4>Notation</h4>
 <p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
 from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
+<h4>A Common Gotcha</h4>
 <p>A gotcha - matching nothing is</p>
 <div class='precode'><pre><code>nothing --> [].
 </code></pre></div>
@@ -213,10 +282,19 @@ from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
 <div class='precode'><pre><code>% DONT DO THIS
 nothing.
 </code></pre></div>
-<p>Exercise</p>
-<div class='precode exercise'><pre><code>Add a comment to every line of example dcg1_1
+<h3>1_4 Variables in Body</h3>
+<p>So what about variables in the body?</p>
+<div class='precode'><pre><code>foo(Bar) -->  
+      "mep",
+      Bar,
+      lemons.
 </code></pre></div>
-
+<p>They are expanded to the first argument of <code>phrase/3</code>, so 
+if Bar in the above is ground to a term it will be treated as a DCG head, and
+if bound to a list as a DCG terminal.</p>
+<p>TODO find a clear explanation of that</p>
+<p>TODO find a good place to mention dcg_basics.pl</p>
+<p>TODO lexical issues</p>
 <p><a id='anch2' ></a></p>
 <h2>2 Relating Trees To Lists</h2>
 
@@ -404,8 +482,16 @@ leaves is not modified when an inner node is processed:</p>
 
 <p>For portability, it is best not to rely on a particular expansion method, and instead to stick to regular DCG constructs like right-hand context notation to refer to states and the <code>phrase/2</code> interface to execute a DCG. </p>
 
+
 <p><a id='anch8' ></a></p>
-<h2>8 Using DCGs</h2>
+<h2>8 Error Handling</h2>
+<p>DCG's are the most common method of parsing files. Here's a few hints how to handle user's errors</p>
+<h3>8_1 Resynching The Parser</h3>
+<p>
+<h3>8_2 Printing Line Numbers</h3>
+
+<p><a id='anch9' ></a></p>
+<h2>9 Using DCGs</h2>
 
 <p>Consider using DCGs if you are:</p>
 
@@ -424,6 +510,8 @@ leaves is not modified when an inner node is processed:</p>
 <p>If you make something beautiful, drop us a link.</p>
 
 <p>Thanks,</p>
+<p>This tutorial is largely taken from a tutorial by Markus Triska, so a special nod to him.
+<p>Ulrich Neumerkel, Richard O'Keefe, Carlo Capelli, and Paulo Moura patiently explained many points on the swipl email list.</p>
 
 <p>Annie</p>
 <p>Markus</p>
