@@ -1,3 +1,5 @@
+% double quoted strings are just lists of UTF-8 codes,
+% so they're terminals too
 cliche -->
     thing,
     " is a ",
@@ -9,8 +11,10 @@ thing --> "Cygwin".
 type_of_thing --> "Unix OS".
 opposite_type_of_thing --> "Windows'".
 
+% query try_literals. to see cliches
 try_literals :- phrase(cliche, X),format('~s~n', [X]).
 
+% you can unify arguments, just like normal prolog predicates
 fizz_buzz(Msg) --> anything, fizz(Msg), anything, buzz, anything.
 anything --> [].
 anything --> [_], anything.

@@ -8,7 +8,7 @@
 </head>
 <body>
 <h1>Using Defnite Clause Grammars in SWI-Prolog</h1>
-<p>NOTE: This tutorial is still in development.</p>
+
 <p>By <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
 <p>Thanks to <a href="mailto:markus.triska@gmx.at">Markus Triska</a>. Large sections
 of this tutorial are taken directly from <a href="http://www.logic.at/prolog/dcg.html">his tutorial</a>,
@@ -22,7 +22,7 @@ which is used by permission here.</p>
 <a href='#anch6'>6 Parsing From Files</a>
 <a href='#anch7'>7 Implementation</a>
 <a href='#anch8'>8 Error Handling</a>
-<a href='#anch8'>9 Using DCGs</a>
+<a href='#anch8'>9 A Few Practical Hints</a>
 <a href='#anchconclusion'>Conclusion</a></p>
 
 <h2>Introduction</h2>
@@ -31,51 +31,63 @@ which is used by permission here.</p>
 
 <h3>Who This Course Is For</h3>
 
-<p>This course is for anyone who knows swi-Prolog reasonably well and wants to effectively generate or parse lists. Notice that those two items go far beyond the canonical DCG task of parsing text.</p>
+<p>Anyone who:</p>
+<ul>
+<li>knows swi-Prolog reasonably well</li>
+<li>and wants to effectively generate or parse lists.</li>
+</ul>
+<p>The second item goes far beyond the usual task of parsing text most programmers associate with DCG's. We'll convert a tree to a list in this tutorial. A DCG could convert a 2D array into a sparse array, or look for patterns in a data stream.</p>
+<p>But, we traditionally associate DCG's with parsing text. So we'll give you some tools for parsing text as well.</p>
+<p><img src="dcguses.png" /></p>
+<p>Is this you?</p>
 
 <h3>Getting The Most From This Course</h3>
-
-<p>Besides this web page we offer a series of example programs.</p>
-
-<p>The example programs are <em>not</em> reproduced here. We want you to actually <em>look at</em> and <em>fiddle with</em> the code. So hopefully you'll be encouraged if you have to read it locally. You can get the examples <a href="https://github.com/Anniepoo/swipldcgtut">from github</a></p>
 
 <p>To get the most from this course, you'll need to</p>
 
 <ul>
 <li>Have a working <a href="http://www.swi-prolog.org">swi-Prolog</a> install </li>
-<li>Get the example files from <a href="https://github.com/Anniepoo/swipldcgtut">from github</a></li>
 <li>Understand basic Prolog be able to use SWI-Prolog's environment</li>
 <li>Read the text</li>
 <li>Try each example program.  Experiment!</li>
+<li>A collection of worked exercises and examples is on <a href="https://github.com/Anniepoo/swipldcgtut">github</a></li>
 <li>Do the exercises</li>
 </ul>
-
-<p>The example programs are labelled with the chapter and section number, so dcg1_2.pl is the code for chapter one section 2.</p>
 
 <p>Different people will have different backgrounds and learning styles. Whatever works for you works.</p>
 
 <h3>Getting Stuck</h3>
 
-<p>If you have questions and reasonable effort doesn't answer them, drop me email at aogborn (somechar) uh.edu. Please, if you're taking a beginning Prolog course, ask your instructor. Questions about family trees will be ignored. But if you're working on a real DCG related problem, feel free.</p>
+<p>If you have questions and <em>reasonable effort</em> doesn't answer them, drop me email at aogborn (somechar) uh.edu. Please, if you're taking a beginning Prolog course, ask your instructor. Questions about family trees will be ignored. But if you're working on a real DCG related problem, feel free.</p>
 
 <p>Asking on ##Prolog on freenode.net IRC is also a good way to get answers.</p>
 
 <p><a id='anch1' ></a></p>
 <h2>1 Definite Clause Grammars</h2>
-<p>A Prolog <em>definite clause grammar</em> (DCG) describes a Prolog list.
-Operationally, DCGs can be used to parse and generate lists.</p>
+<p>A Prolog <em>definite clause grammar</em> (DCG) <em>describes a Prolog list</em>.</p>
+
+<p>Operationally, DCGs can be used to parse and generate lists.</p>
+
 <h3>1_1 DCG rules</h3>
 <p>A DCG is defined by <em>DCG rules</em>. A DCG rule has the form: </p>
 
-<div class='precode'><pre><code>Head --&gt; Body.
+<div class='precode'><pre><code><em>head</em> --&gt; <em>body</em>.
 </code></pre></div>
-<p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
-from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
-<p>A rule's head is a Prolog term that is not a variable.</p>
-<p>A rule's body is a sequence of terminals and nonterminals, separated by (,)/2 (comma operator).</p>
+<p>Analagous to normal Prolog rules with:</p>
+<div class='precode'><pre><code><em>head</em> :- <em>body</em>.
+</code></pre></div>
+
+<p>A rule's head is a (non variable) Prolog term.</p>
+<p>A rule's body is a sequence of terminals and nonterminals, separated by commas.</p>
 <p>A terminal is a Prolog list, which stands for the elements it contains.</p>
-A nonterminal refers to a DCG rule or other language construct, which stand for the elements 
-they themselves describe. Declaratively, we can read the comma as <em>"and then"</em> in DCGs. </p>
+<div class='precode'><pre><code>some_terminals --&gt;
+     [this, is, a, teminal],
+     [so, is, this],
+     "code strings are also lists, so this too is a terminal".
+</code></pre></div>
+<p>A nonterminal refers to a DCG rule or other language construct, which stand for the elements 
+they themselves describe.</p>
+<p>Declaratively, we can read the comma as <em>"and then"</em> in DCGs. </p>
 <p><img src="syntaxofdcg.png" /></p>
 <p>As an example, let us describe lists that only contain the atom 'a'. We shall use the nonterminal <code>as//0</code> to refer to such lists: </p>
 
@@ -85,7 +97,7 @@ they themselves describe. Declaratively, we can read the comma as <em>"and then"
 
 <p>The first rule says: The empty list is such a list. The second rule says: A list containing the atom 'a' <em>and then</em> only atoms 'a' is also such a list.</p>
 
-<p>To execute a grammar rule, we use Prolog's <code>built-in phrase/2</code> predicate. The first argument is a DCG body. <code>phrase(Body, Ls)</code> is true iff Body describes the list Ls.</p>
+<p>To execute a grammar rule, we use Prolog's built-in <code>phrase/2</code> predicate. The first argument is a DCG body. <code>phrase(Body, Ls)</code> is true iff Body describes the list Ls.</p>
 
 <p>The most general query asks for all solutions:</p>
 
@@ -158,7 +170,7 @@ buzz -->
 1) Modify the 'cliche' example above to also print 
 Fluffy is a dog trapped in a cat's body.
 Bob the swimmer is a fish trapped in a human body.
-and so on. Hint - use arguments to ensure you don't print
+and so on, but not Fluffy is a fish trapped in a human body. Hint - use arguments to ensure you don't print
 Bob the swimmer is a dog trapped in a Windows' body.
 
 2) Try the queries above in 'examples of more specific queries'
@@ -171,6 +183,8 @@ article_phrase --> ("a" ; "an"),
 
 noun --> "book".
 noun --> "car".
+
+3) Write a program to generate random well formed English sentences for a small subset of English.
 </code></pre></div>
 <p>The <code>\+</code> operator matches the empty sequence if and only if the material beyond does <em>not</em>
 match it's argument</p>
@@ -188,7 +202,7 @@ anything_but_joe(A, B) :-
 <div class='precode'><pre><code>
 at_end --> \+ [_].
 </code></pre></div>
-<p>Which matches the end of the file.</p>
+<p>Which matches the end of the list.</p>
 <div class='precode exercise'><pre><code>Exercise:
 Implement a demonstration of the at_end nonterm.
 </code></pre></div>
@@ -259,7 +273,7 @@ boop(X) -->
     suffix(X).
 
 suffix([H|T]) -->
-      [H],
+      [H],  % The magic - we grab the digit here
       {
           code_type(H, digit)
       },
@@ -271,9 +285,15 @@ anything --> [_], anything.
 % A subtlety here.  "foo 7 beep1 bar boop14 fdds" is part of the language
 
 </code></pre></div>
+<p>Exercise:</p>
+<div class='precode exercise'><pre><code>
+1) Make a little library of DCG's that match valid identifiers for other languages you know.
+</code></pre></div>
 <h4>Notation</h4>
 <p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
 from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
+<p>The actual arity of a DCG is 2 more than the number of arguments (so html//1 is arity 3)</p>
+
 <h4>A Common Gotcha</h4>
 <p>A gotcha - matching nothing is</p>
 <div class='precode'><pre><code>nothing --> [].
@@ -290,11 +310,8 @@ nothing.
       lemons.
 </code></pre></div>
 <p>They are expanded to the first argument of <code>phrase/3</code>, so 
-if Bar in the above is ground to a term it will be treated as a DCG head, and
+if Bar in the above is ground to a term it will be treated as a common Prolog predicate, and
 if bound to a list as a DCG terminal.</p>
-<p>TODO find a clear explanation of that</p>
-<p>TODO find a good place to mention dcg_basics.pl</p>
-<p>TODO lexical issues</p>
 <p><a id='anch2' ></a></p>
 <h2>2 Relating Trees To Lists</h2>
 
@@ -348,7 +365,12 @@ if bound to a list as a DCG terminal.</p>
   Tree = node(a, nil, node(c, node(b, nil, nil), node(d, nil, nil))) ;
   etc.
 </code></pre></div>
-
+<div class='precode exercise'><pre><code>Exercise:
+1) a useful DCG to have in your snippet bin is one that matches anything. Write one.
+2) use a dcg to convert a sparse sequence like [0,0,0,0,0,0,7,4,3,0,0,0,0,0,0,0,8,9,14,0,0,0,0....] to
+[zero(6), 7,4,3, zero(7),8,9,14,...]
+3) does it work in both directions?
+</code></pre></div>
 <p><a id='anch4' ></a></p>
 <h2>4 Right-hand Context Notation</h2>
 
@@ -460,7 +482,7 @@ leaves is not modified when an inner node is processed:</p>
   false.
 </code></pre></div>
 
-<p>Again, What is unified with the character codes for <em>i</em> and <em>t</em>. </p>
+<p>Again, <i>What</i> is unified with the character codes for <em>i</em> and <em>t</em>. </p>
 
 <p><a id='anch7' ></a></p>
 <h2>7 Implementation</h2>
@@ -482,38 +504,119 @@ leaves is not modified when an inner node is processed:</p>
 
 <p>For portability, it is best not to rely on a particular expansion method, and instead to stick to regular DCG constructs like right-hand context notation to refer to states and the <code>phrase/2</code> interface to execute a DCG. </p>
 
-
+<div class='precode exercise'><pre><code>Exercises:
+1) Modify the exercise you did for 1_2 to accept a bit more English, <em>without</em> adding any more explicit DCG's. Write the additional productions as ordinary Prolog predicates instead.
+</code></pre></div>
 <p><a id='anch8' ></a></p>
 <h2>8 Error Handling</h2>
-<p>DCG's are the most common method of parsing files. Here's a few hints how to handle user's errors</p>
+<p>In practice we want a lot more than to just throw up our hands when the input doesn't match the language we understand. When we can't continue parsing, we need to print an intelligent error message and then continue parsing the file.</p>
+<p>A program that effectively quits on encountering an input error isn't very friendly. Imagine you've fed a 1000 line program to your compiler, and it stops on an error on line 2. You fix the error, run it again, it gets to line 7. It's going to be a long day...</p>
+<p>We want to find a place that's probably beyond the actual error, where we can guess we're at a known point in the parse, and 'resync' the parser.</p>
 <h3>8_1 Resynching The Parser</h3>
-<p>
+<p>Suppose we have a language whose methods end in a semicolon. Part of our parser might look like</p>
+<div class='precode'><pre><code>my_language --> [].
+my_language --> a_method, ";", my_language.
+
+a_method --> ... some stuff ....
+</code></pre></div>
+
+<p>To recognize an error, our basic strategy is to expand the language our parser recognizes so it includes every string. If it's not part of the language, it's part of the error stuff.</p>
+<p>We could do that with something like the code in red:</p>
+
+<div class='precode'><pre><code>my_language --> [].
+my_language --> a_method, ";", my_language.
+<font color='#ff4444'>my_language --> error_stuff,
+        { format('darn that''s an error', []) }.</font>
+
+a_method --> ... some stuff ....
+
+<font color='#ff4444'>
+error_stuff -->
+        error_stuff_helper.
+        
+error_stuff_helper --> [].
+error_stuff_helper --> [_], error_stuff_helper.
+</font>
+</code></pre></div>
+
+<p>At this point we're little better off. How much input is error, and when should we start expecting to see well formed program again? Finding a point to start parsing again is called 'resynching' the parser.</p>
+<p>Since methods in our language end with semicolons, a reasonable place for use to resynch is after hitting a semicolon.</p>
+
+<div class='precode'><pre><code>my_language --> [].
+my_language --> a_method, ";", my_language.
+<font color='#ff4444'>my_language --> error_stuff, ";", 
+       { format('darn that''s an error', []) },
+       my_language.</font>
+
+a_method --> ... some stuff ....
+
+error_stuff -->
+        error_stuff_helper.
+        
+error_stuff_helper --> [].
+error_stuff_helper --> [_], error_stuff_helper.
+
+</code></pre></div>
+<p>Of course you can have more than one level of resync. The sooner you can resync, the more accurately you'll locate errors for your users.</p>
+<p>Exercises:</p>
+<div class='precode exercise'><pre><code>
+1) Pick a computer language. Find points in it's syntax where you could restart after an error.
+2) Look at syntax errors in your own code and the compiler messages they generate. How accurately did the message locate the error?
+</code></pre></div>
+
 <h3>8_2 Printing Line Numbers</h3>
-
+<p>Ever had a message like 'Syntax Error in input' printed by a program when you fed it 500,000 lines of data? Isn't that helpful? Including the line number in the input is pretty much a necessity.</p>
+<h4>If you're using phrase_from_file</h4>
+<p>If you're using <code>phrase_from_file/2</code> you're in luck. <code>line_count/2</code> and <code>line_position/2</code> will give you your location for free.</p>
+<h4>If you can't use phrase_from_file</h4>
+<p>For complex grammars it's often worthwhile to first lexically parse tokens, and then parse that token stream for the real grammar.</p>
+<p>If you do this, or if you've gotten your input list somewhere other than a file, you'll have to use other methods to preserve line numbers.</p>
+<p>One way to do it is to insert tokens in the input stream, then carry them along with right hand context notation. Alternatively, one can just count them and pass as an argument.</p>
+<p>If the language is such that the location can be recognized from a few lines of code, a simple trick suffices. Introduce a 'service' production to print out the remainder of the list, or a fraction thereof. This is also handy for debugging.</p>
+<div class='precode'><pre><code>x --> p, "a", x.
+x --> "".
+p(L, L) :- format('~s~n', [L]). % or do something fancier with L
+</code></pre></div>
+<p>One could truncate L, or scan forward in L looking for a line number marker if there's been a lexical pass.</p>
+<p>For some languages, it can be useful to have the entire chain of nonterminals the user is nested in. <code>prolog_current_frame/1</code> and <code>prolog_frame_attribute/3</code> would let you unwind the stack. If you explicitly pass the line number, you can show line numbers. This is an advanced trick.</p>
 <p><a id='anch9' ></a></p>
-<h2>9 Using DCGs</h2>
+<h2>9 A Few Practical Hints</h2>
+<h3>9_1 basics.pl</h3>
+<p>A handy set of commonly used DCG primitives is available in
+<a href='http://www.swi-prolog.org/pldoc/doc/swi/library/dcg/basics.pl'>DCG Basics</a>. This lib has recently moved out of the http stuff, if you have an older version it may be elsewhere as <code>http/dcg_basics.pl</code>.</p>
 
-<p>Consider using DCGs if you are:</p>
+<div class='precode'><pre><code>:- use_module(library(dcg/basics)).
+</code></pre></div>
 
+<p>Will get you a handy dandy mass of DCG's to identify commonly parsed items like numbers, strings up to a delimiter, etc.</p>
+<h3>9_2 Lexical Issues</h3>
+<p>For complex grammars it's often worthwhile to first lexically parse tokens, and then parse that token stream for the real grammar. Doing this often makes handling these things easier:</p>
 <ul>
-<li>describing a list and your code is more complicated than you think it could be.</li>
-<li>parsing a list.</li>
-<li>reading from a file.</li>
-<li>passing around a state representation that only a few predicates actually use or modify.</li>
+<li>Comments - especially if your language has both delimiter /* */ and // end of line style comments</li>
+<li>Preprocessor - Things like #ifdef blah blah</li>
+<li>string literals</li>
+<li>whitespace - adding optional whitespace everywhere can get old. You can remove it while tokenizing</li>
+<li>Inclusion - if your language has file inclusion, doing it in the lexer is easier</li>
+<li>lowercasing and regularizing spelling</li>
 </ul>
+<h3>Regular Expressions</h3>
+<p>Every so often a new Prolog programmer will ask "<i>where's the regular expression library?</i>"</p>
+<p>With DCG's built into the language there's no need for a regex library.</p>
 
 <p><a id='anchconclusion' ></a></p>
 <h2>Conclusion</h2>
+<p>In conclusion, I'd remind you  - if you're working with lists, DCG's can definitely make your life easier. They're not just for parsing any more!</p>
 
 <p>Thanks for taking this tutorial. If I can improve anything please email me at aogborn (hat) uh.edu.</p>
 
 <p>If you make something beautiful, drop us a link.</p>
 
 <p>Thanks,</p>
-<p>This tutorial is largely taken from a tutorial by Markus Triska, so a special nod to him.
+<p>This tutorial is based on a tutorial by Markus Triska, so a special nod to him.</p>
 <p>Ulrich Neumerkel, Richard O'Keefe, Carlo Capelli, and Paulo Moura patiently explained many points on the swipl email list.</p>
+<p>Props to the Sanskrit grammarian Paa&ntilde;ini, who first formalized grammar.</p>
+<div><img src="panini.jpg" /></p>
 
 <p>Annie</p>
-<p>Markus</p>
 </body>
 </html>
