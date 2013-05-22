@@ -28,3 +28,45 @@ buzz -->
 
 try_fizz_buzz :- phrase(fizz_buzz('howdy'), X),format('~s~n', [X]).
 
+% The ; operator allows alternatives. This matches a book,
+% an book, a car, or an car
+%
+article_phrase --> ("a" ; "an"),
+	" ",
+	noun.
+
+noun --> "book".
+noun --> "car".
+
+try_article_phrase :-
+	phrase(article_phrase, X),
+	format('~s~n', [X]),
+	fail.
+try_article_phrase.
+
+something(X) -->
+      ({ is_wobbly(X) }  ->
+               "a wobbly ",
+               thing
+        ;
+               "a stable ",
+               thing
+       ).
+
+is_wobbly(X) :-
+	X = wobbly.
+
+try_something :-
+	phrase(something(wobbly), Generated),
+	format('~s~n', [Generated]),
+	fail.
+try_something :-
+	phrase(something(not_wobbly), Generated),
+	format('~s~n', [Generated]),
+	fail.
+try_something.
+
+
+
+
+

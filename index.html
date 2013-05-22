@@ -7,6 +7,7 @@
 <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<p><a href="/swipltuts/">Home</a></p>
 <h1>Using Definite Clause Grammars in SWI-Prolog</h1>
 
 <p>By <a href="mailto:aogborn@uh.edu">Anne Ogborn</a></p>
@@ -73,7 +74,7 @@ which is used by permission here.</p>
 
 <div class='precode'><pre><code><em>head</em> --&gt; <em>body</em>.
 </code></pre></div>
-<p>Analagous to normal Prolog rules with:</p>
+<p>Analogous to normal Prolog rules with:</p>
 <div class='precode'><pre><code><em>head</em> :- <em>body</em>.
 </code></pre></div>
 
@@ -187,7 +188,7 @@ noun --> "car".
 3) Write a program to generate random well formed English sentences for a small subset of English.
 </code></pre></div>
 <p>The <code>\+</code> operator matches the empty sequence if and only if the material beyond does <em>not</em>
-match it's argument</p>
+match its argument</p>
 <p>By using the construct <code>\+</code> you are giving up many of the nice
 algebraic properties grammars are known for.  In particular, you can
 no longer be sure that a grammar generates the sentences it accepts.</p>
@@ -206,7 +207,7 @@ at_end --> \+ [_].
 <div class='precode exercise'><pre><code>Exercise:
 Implement a demonstration of the at_end nonterm.
 </code></pre></div>
-<p>The <code>-></code> operator means 'if followed by', and is semanticly near comma, so is infrequently used</p>
+<p>The <code>-></code> operator means 'if followed by', and is semantically near comma, so is infrequently used</p>
 <div class='precode'><pre><code>
 ab_or_c --> [a] -> [b]  ; [c].
 
@@ -247,16 +248,13 @@ true.
 <p>One construct where -> can produce clarity is controlling alternatives with <code>{}</code></p>
 <div class='precode'><pre><code>
 something(X) --> 
-      { is_wobbly(X) }  ->
-            (  
-               "a wobby ",
+      ({ is_wobbly(X) }  ->
+               "a wobbly ",
                thing 
-            )
         ;
-            (
                "a stable ",
                thing
-            ).
+       ).
 </code></pre></div>
 
 <h3>1_3 Capturing Input</h3>
@@ -560,7 +558,7 @@ error_stuff_helper --> [_], error_stuff_helper.
 <p>Of course you can have more than one level of resync. The sooner you can resync, the more accurately you'll locate errors for your users.</p>
 <p>Exercises:</p>
 <div class='precode exercise'><pre><code>
-1) Pick a computer language. Find points in it's syntax where you could restart after an error.
+1) Pick a computer language. Find points in its' syntax where you could restart after an error.
 2) Look at syntax errors in your own code and the compiler messages they generate. How accurately did the message locate the error?
 </code></pre></div>
 
