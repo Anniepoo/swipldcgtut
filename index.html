@@ -472,7 +472,7 @@ leaves is not modified when an inner node is processed:</p>
 
 <p>Using <code>library(pio)</code>, we can transparently parse from a file with the same DCG. Assume that the file 'like.txt' starts with the string "I like it."</p>
 
-<div class='precode'><pre><code>  ?- [library(pio)].
+<div class='precode'><pre><code>  ?- use_module(library(pio)).
   true.
 
   ?- phrase_from_file(like(What), 'like.txt').
