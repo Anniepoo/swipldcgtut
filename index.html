@@ -89,7 +89,7 @@ which is used by permission here.</p>
      [so, is, this],
      "code strings are also lists, so this too is a terminal".
 </code></pre></div>
-<p>A nonterminal refers to a DCG rule or other language construct, which stand for the elements 
+<p>A nonterminal refers to a DCG rule or other language construct, which stand for the elements
 they themselves describe.</p>
 <p>Declaratively, we can read the comma as <em>"and then"</em> in DCGs. </p>
 <p><img src="syntaxofdcg.png" /></p>
@@ -137,15 +137,15 @@ they themselves describe.</p>
 2) Try the queries above in 'examples of more specific queries'
 </code></pre></div>
 <h3>1_2 More DCG Syntax</h3>
-<p>Double quoted strings <code>"some text"</code> are lists of char codes 
+<p>Double quoted strings <code>"some text"</code> are lists of char codes
 (this behavior is changeable in SWI-Prolog). This makes for a convenient syntax with
-literals as strings:</p> 
+literals as strings:</p>
 <div class='precode'><pre><code>cliche -->
     thing,
-    " is a ", 
-    type_of_thing, 
-    " trapped in a ", 
-    opposite_type_of_thing, 
+    " is a ",
+    type_of_thing,
+    " trapped in a ",
+    opposite_type_of_thing,
     " body.".
 thing --> "Cygwin".
 type_of_thing --> "Unix OS".
@@ -171,7 +171,7 @@ buzz -->
 </code></pre></div>
 <p>&nbsp;</p>
 <div class='precode exercise'><pre><code>Exercises:
-1) Modify the 'cliche' example above to also print 
+1) Modify the 'cliche' example above to also print
 Fluffy is a dog trapped in a cat's body.
 Bob the swimmer is a fish trapped in a human body.
 and so on, but not Fluffy is a fish trapped in a human body. Hint - use arguments to ensure you don't print
@@ -250,15 +250,28 @@ true.
 </code></pre></div>
 <p>One construct where -> can produce clarity is controlling alternatives with <code>{}</code></p>
 <div class='precode'><pre><code>
-something(X) --> 
+something(X) -->
       ({ is_wobbly(X) }  ->
                "a wobbly ",
-               thing 
+               thing
         ;
                "a stable ",
                thing
        ).
 </code></pre></div>
+<p>The cut  <b>!</b> operator works as it does in most Prolog, to commit a choice.</p>
+
+<code><pre>
+    command -->
+        "load",
+        !,   % this stops us from considering other options
+        load_args.
+    command -->
+        "save",
+        !,
+        save_args.
+    ... and so on
+</code></pre>
 
 <h3>1_3 Capturing Input</h3>
 <p>Arguments allow us to capture and use the input list. In this example any digits after
@@ -291,7 +304,7 @@ anything --> [_], anything.
 1) Make a little library of DCG's that match valid identifiers for other languages you know.
 </code></pre></div>
 <h4>Notation</h4>
-<p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it 
+<p>A DCG head with functor f and arity N is referred to as <code>f//N</code> to distinguish it
 from a regular Prolog predicate, which we refer to as <code>f/N</code>.</p>
 <p>The actual arity of a DCG is 2 more than the number of arguments (so html//1 is arity 3)</p>
 
@@ -305,12 +318,12 @@ nothing.
 </code></pre></div>
 <h3>1_4 Variables in Body</h3>
 <p>So what about variables in the body?</p>
-<div class='precode'><pre><code>foo(Bar) -->  
+<div class='precode'><pre><code>foo(Bar) -->
       "mep",
       Bar,
       lemons.
 </code></pre></div>
-<p>They are expanded to the first argument of <code>phrase/3</code>, so 
+<p>They are expanded to the first argument of <code>phrase/3</code>, so
 if Bar in the above is ground to a term it will be treated as a common Prolog predicate, and
 if bound to a list as a DCG terminal.</p>
 <p><a id='anch2' ></a></p>
@@ -424,7 +437,7 @@ next element in the list without removing it. Operationally, we first remove it 
 <p><a id='anch5' ></a></p>
 <h2>5 Implicitly Passing States Around</h2>
 
-<p>Right-hand context notation is also useful to implicitly pass around a state representation 
+<p>Right-hand context notation is also useful to implicitly pass around a state representation
 that is only accessed and changed by a subset of rules. For example, let us count the leaves in a
 binary tree with the above presentation. The <em>state</em> we shall pass around is a single number
 denoting the number of leaves encountered so far. To increment the state, we use Prolog's
@@ -534,7 +547,7 @@ a_method --> ... some stuff ....
 <font color='#ff4444'>
 error_stuff -->
         error_stuff_helper.
-        
+
 error_stuff_helper --> [].
 error_stuff_helper --> [_], error_stuff_helper.
 </font>
@@ -545,7 +558,7 @@ error_stuff_helper --> [_], error_stuff_helper.
 
 <div class='precode'><pre><code>my_language --> [].
 my_language --> a_method, ";", my_language.
-<font color='#ff4444'>my_language --> error_stuff, ";", 
+<font color='#ff4444'>my_language --> error_stuff, ";",
        { format('darn that''s an error', []) },
        my_language.</font>
 
@@ -553,7 +566,7 @@ a_method --> ... some stuff ....
 
 error_stuff -->
         error_stuff_helper.
-        
+
 error_stuff_helper --> [].
 error_stuff_helper --> [_], error_stuff_helper.
 
