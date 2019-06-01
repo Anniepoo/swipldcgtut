@@ -581,7 +581,7 @@ error_stuff_helper --> [_], error_stuff_helper.
 <h3>8_2 Printing Line Numbers</h3>
 <p>Ever had a message like 'Syntax Error in input' printed by a program when you fed it 500,000 lines of data? Isn't that helpful? Including the line number in the input is pretty much a necessity.</p>
 <h4>If you're using phrase_from_file</h4>
-<p>If you're using <code>phrase_from_file/2</code> you're in luck. <code>line_count/2</code> and <code>line_position/2</code> will give you your location for free.</p>
+<p>If you're using <code>phrase_from_file/2</code> you're in luck. <code><a href="http://www.swi-prolog.org/pldoc/doc_for?object=lazy_list_location//1">lazy_list_location//1</a></code> will give you your location for free.</p>
 <h4>If you can't use phrase_from_file</h4>
 <p>For complex grammars it's often worthwhile to first lexically parse tokens, and then parse that token stream for the real grammar.</p>
 <p>If you do this, or if you've gotten your input list somewhere other than a file, you'll have to use other methods to preserve line numbers.</p>
