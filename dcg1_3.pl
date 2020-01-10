@@ -26,14 +26,14 @@ anything --> [_], anything.
 %
 try_beep_boop :- member(X, [
                         `sdfdsbeep24sldfkboop14dfk`,
-                        `sdfdsbeep24sldfkboop14dfk`,
+                        `sdfdsbeep24sldfkbeep14dfk`,
                         `beepboop`,
                         `beep`,
                         `beep2boop`,
                         `         beep  boop`]),
                  (   phrase(beep_boop, X)
-                 ->  format('~s is a beepboop~n', [X])
-                 ;   format('~s is not~n', [X])
+                 ->  format('\"~s\" is a beepboop~n', [X])
+                 ;   format('\"~s\" is not~n', [X])
                  ),
                  fail.
 try_beep_boop.
