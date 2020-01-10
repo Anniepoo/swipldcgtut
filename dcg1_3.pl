@@ -24,7 +24,19 @@ anything --> [_], anything.
 
 % A subtlety here.  "foo 7 beep1 bar boop14 fdds" is part of the language
 %
-try_beep_boop :- phrase(beep_boop, X),format('~s~n', [X]).
+try_beep_boop :- member(X, [
+                        `sdfdsbeep24sldfkboop14dfk`,
+                        `sdfdsbeep24sldfkboop14dfk`,
+                        `beepboop`,
+                        `beep`,
+                        `beep2boop`,
+                        `         beep  boop`]),
+                 (   phrase(beep_boop, X)
+                 ->  format('~s is a beepboop~n', [X])
+                 ;   format('~s is not~n', [X])
+                 ),
+                 fail.
+try_beep_boop.
 
 
 %%	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
