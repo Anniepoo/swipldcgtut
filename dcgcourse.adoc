@@ -1,17 +1,9 @@
 = Using Definite Clause Grammars in SWI-Prolog
+:toc2:
+:icons:
+:numbered:
 
 by link:mailto:markus.triska@gmx.at[Markus Triska] and link:mailto:aogborn@uh.edu[Anne Ogborn]
-
-<<anchintro,Introduction>>
-<<anch1,1 Definite Clause Grammars>>
-<<anch2,2 Relating Trees To Lists>>
-<<anch3,3 Left Recursion>>
-<<anch4,4 Right-hand Context Notation>>
-<<anch5,5 Implicitly Passing States Around>>
-<<anch6,6 Parsing From Files>>
-<<anch7,7 Implementation>>
-<<anch8,8 Using DCGs>>
-<<anchanchconclusion,Conclusion>>
 
 == Introduction
 
